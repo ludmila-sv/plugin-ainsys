@@ -11,10 +11,10 @@ if ( ! function_exists( 'ainsysconnector_autoloader' ) ) {
 				return false;
 			}
 
-			$family_slug = strtolower( $parts[0] );
-			$plugin_slug = str_replace( '_', '-', strtolower( $parts[1] ) );
-			$plugin_slug = $plugin_slug;
-			$parts[count( $parts ) - 1] = 'class-' . str_replace( '_', '-', strtolower( $parts[count( $parts ) - 1] ) );
+			$family_slug                  = strtolower( $parts[0] );
+			$plugin_slug                  = str_replace( '_', '-', strtolower( $parts[1] ) );
+			$plugin_slug                  = $plugin_slug;
+			$parts[ count( $parts ) - 1 ] = 'class-' . str_replace( '_', '-', strtolower( $parts[ count( $parts ) - 1 ] ) );
 			unset( $parts[0] );
 			unset( $parts[1] );
 
