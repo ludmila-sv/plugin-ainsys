@@ -888,7 +888,7 @@ class ainsys_core {
 	 */
 	static function register_events_and_settings() {
 		//$key = Ainsys_Settings::get_option('ansys_api_key');
-		$webhook_url = Ainsys_Settings::get_option( 'ansys_connector_woocommerce_ansys_api_key' ); //https://user-api.ainsys.com/api/v0/workspace-management/workspaces/13/connectors/144/handshake/5ec1a0c99d428601ce42b407ae9c675e0836a8ba591c8ca6e2a2cf5563d97ff0/
+		$webhook_url = Settings\Ainsys_Settings::get_option( 'ansys_connector_woocommerce_ansys_api_key' ); //https://user-api.ainsys.com/api/v0/workspace-management/workspaces/13/connectors/144/handshake/5ec1a0c99d428601ce42b407ae9c675e0836a8ba591c8ca6e2a2cf5563d97ff0/
 
 		if ( ! empty( $webhook_url ) && empty( get_option( 'ainsys-webhook_url' ) ) ) {
 			//new connector

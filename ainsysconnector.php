@@ -34,8 +34,11 @@ require_once __DIR__ . '/autoloader.php';
 
 use Ainsysconnector\Master\Core\Ainsys_Init;
 Ainsys_Init::init();
-//include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/class-ainsys-init.php';
-include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/class-ainsys-settings.php';
+
+use Ainsysconnector\Master\Settings\Ainsys_Settings;
+Ainsys_Settings::init();
+
+//include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/class-ainsys-settings.php';
 include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/ainsys-html.php';
 include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/ainsys-core.php';
 include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/ainsys-webhook-listener.php';
