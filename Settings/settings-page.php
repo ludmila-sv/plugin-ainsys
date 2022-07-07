@@ -1,9 +1,9 @@
 <?php
 
-namespace Ainsysconnector\Master;
+namespace Ainsysconnector\Master\Settings;
 
 try {
-	$status = ainsys_core::is_ainsys_integration_active( 'check' );
+	$status = \Ainsysconnector\Master\ainsys_core::is_ainsys_integration_active( 'check' );
 } catch ( \Exception $e ) {
 	echo esc_html( $e->getMessage() );
 }
@@ -27,7 +27,7 @@ try {
 		<div id="setting_section_general" class="tab-target nav-tab-active tab-target-active">
 			<form method="post" action="options.php">
 				<?php
-				$set = Settings\Ainsys_Settings::get_option_name( 'group' );
+				$set = Ainsys_Settings::get_option_name( 'group' );
 				settings_fields( $set );
 				?>
 				<table class="form-table">
@@ -38,8 +38,8 @@ try {
 						</th>
 						<td>
 							<input type="text" size="50" 
-								name="<?php echo esc_html( Settings\Ainsys_Settings::get_option_name( 'ansys_api_key' ) ); ?>" placeholder="XXXXXXXXXXXXXXXXXXXXX" 
-								value="<?php echo esc_html( Settings\Ainsys_Settings::get_option( 'ansys_api_key' ) ); ?> "/>
+								name="<?php echo esc_html( Ainsys_Settings::get_option_name( 'ansys_api_key' ) ); ?>" placeholder="XXXXXXXXXXXXXXXXXXXXX" 
+								value="<?php echo esc_html( Ainsys_Settings::get_option( 'ansys_api_key' ) ); ?> "/>
 
 							<?php
 							if ( ! empty( $status ) && 'success' === $status['status'] ) :
@@ -55,8 +55,8 @@ try {
 						<th scope="row"><?php _e( 'Server hook_url', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></th>
 						<td>
 							<input type="text" size="50" 
-								name="<?php echo( Settings\Ainsys_Settings::get_option_name( 'hook_url' ) ); ?>" 
-								value="<?php echo Settings\Ainsys_Settings::get_option( 'hook_url' ); ?>" disabled="1"/>
+								name="<?php echo( Ainsys_Settings::get_option_name( 'hook_url' ) ); ?>" 
+								value="<?php echo Ainsys_Settings::get_option( 'hook_url' ); ?>" disabled="1"/>
 						</td>
 					</tr>
 
@@ -69,18 +69,18 @@ try {
 						</th>
 						<td>
 							<input type="text" 
-								name="<?php echo esc_html( Settings\Ainsys_Settings::get_option_name( 'backup_email' ) ); ?>"
+								name="<?php echo esc_html( Ainsys_Settings::get_option_name( 'backup_email' ) ); ?>"
 								placeholder="backup@email.com" 
-								value="<?php echo esc_html( Settings\Ainsys_Settings::get_backup_email() ); ?>"/>
+								value="<?php echo esc_html( Ainsys_Settings::get_backup_email() ); ?>"/>
 						</td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><?php _e( 'Purge all stored data during uninstall', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></th>
 						<td>
 							<input id="full_uninstall_checkbox" type="checkbox" 
-							name="<?php echo ( Settings\Ainsys_Settings::get_option_name( 'full_uninstall' ) ); ?>"
-							value="<?php echo esc_html( Settings\Ainsys_Settings::get_option( 'full_uninstall' ) ); ?>"
-							<?php checked( 1, esc_html( Settings\Ainsys_Settings::get_option( 'full_uninstall' ) ), true ); ?>
+							name="<?php echo ( Ainsys_Settings::get_option_name( 'full_uninstall' ) ); ?>"
+							value="<?php echo esc_html( Ainsys_Settings::get_option( 'full_uninstall' ) ); ?>"
+							<?php checked( 1, esc_html( Ainsys_Settings::get_option( 'full_uninstall' ) ), true ); ?>
 							/>
 						</td>
 					</tr>
@@ -109,7 +109,7 @@ try {
 						</li>
 						<li>
 							<b><?php _e( 'WordPress WooCommerce activated -', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></b>
-							<?php if ( Settings\Ainsys_Settings::is_plugin_active( 'woocommerce/woocommerce.php' ) ) : ?>
+							<?php if ( Ainsys_Settings::is_plugin_active( 'woocommerce/woocommerce.php' ) ) : ?>
 								<span style="color: #46b450;"><?php _e( 'Yes.', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></span>
 							<?php else : ?>
 								<span style="color: #dc3232;"><?php _e( 'No.', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></span>
@@ -118,7 +118,7 @@ try {
 						<li>
 							<b><?php _e( 'WordPress ACF activated -', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></b>
 							<?php
-							if ( Settings\Ainsys_Settings::is_plugin_active( 'advanced-custom-fields/acf.php' ) || Settings\Ainsys_Settings::is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) :
+							if ( Ainsys_Settings::is_plugin_active( 'advanced-custom-fields/acf.php' ) || Ainsys_Settings::is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) :
 								?>
 								<span style="color: #46b450;"><?php _e( 'Working', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></span>
 							<?php else : ?>
@@ -128,7 +128,7 @@ try {
 						<li>
 							<b><?php _e( 'WordPress Contact Form 7 activated -', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></b>
 							<?php
-							if ( Settings\Ainsys_Settings::is_plugin_active( 'contact-form-7/wp-contact-form-7.php' ) ) :
+							if ( Ainsys_Settings::is_plugin_active( 'contact-form-7/wp-contact-form-7.php' ) ) :
 								?>
 								<span style="color: #46b450;"><?php _e( 'Working', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></span>
 							<?php else : ?>
@@ -164,7 +164,7 @@ try {
 						<li>
 							<?php _e( 'Backup email -', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?>
 							<?php
-							if ( ! empty( Settings\Ainsys_Settings::get_backup_email() ) && filter_var( Settings\Ainsys_Settings::get_backup_email(), FILTER_VALIDATE_EMAIL ) ) :
+							if ( ! empty( Ainsys_Settings::get_backup_email() ) && filter_var( Ainsys_Settings::get_backup_email(), FILTER_VALIDATE_EMAIL ) ) :
 								?>
 								<span style="color: #46b450;"><?php _e( 'Valid', 'AINSYS_CONNECTOR_TEXTDOMAIN' ); ?></span>
 							<?php else : ?>
@@ -178,8 +178,8 @@ try {
 
 		<div id="setting_section_log" class="tab-target">
 			<?php
-			$start = Settings\Ainsys_Settings::$do_log_transactions ? ' disabled' : '';
-			$stop  = Settings\Ainsys_Settings::$do_log_transactions ? '' : ' disabled';
+			$start = Ainsys_Settings::$do_log_transactions ? ' disabled' : '';
+			$stop  = Ainsys_Settings::$do_log_transactions ? '' : ' disabled';
 
 			$controls  = '<div class="controls">';
 			$controls .= '<a id="start_loging" class="button button-primary loging_controll' . $start . '">' . __( 'Start loging', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) . '</a>';
@@ -195,7 +195,7 @@ try {
 			$controls .= '<a id="clear_log" class="button button-primary">' . __( 'Clear log', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) . '</a>
 						</div>';
 
-			echo '<div class="log_block">' . $controls . ainsys_html::generate_log_html() . '</div>';
+			echo '<div class="log_block">' . $controls . Ainsys_Html::generate_log_html() . '</div>';
 
 			?>
 		</div>
@@ -221,4 +221,4 @@ try {
 
 <!--        !!Debug  BLOCK !!           -->
 <?php
-echo ainsys_html::generate_debug_log() ?>
+echo Ainsys_Html::generate_debug_log() ?>

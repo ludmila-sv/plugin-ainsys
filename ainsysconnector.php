@@ -38,8 +38,10 @@ Ainsys_Init::init();
 use Ainsysconnector\Master\Settings\Ainsys_Settings;
 Ainsys_Settings::init();
 
+use Ainsysconnector\Master\Settings\Ainsys_Html;
+
 //include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/class-ainsys-settings.php';
-include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/ainsys-html.php';
+//include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/ainsys-html.php';
 include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/ainsys-core.php';
 include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/ainsys-webhook-listener.php';
 include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/utm-hendler.php';

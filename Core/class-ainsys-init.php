@@ -168,7 +168,7 @@ if ( ! class_exists( 'Ainsys_Init' ) ) {
 		 *
 		 */
 		public static function include_settings_page() {
-			include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/includes/settings-page.php';
+			include_once AINSYS_CONNECTOR_PLUGIN_DIR . '/Settings/settings-page.php';
 		}
 
 		/**
@@ -203,7 +203,7 @@ if ( ! class_exists( 'Ainsys_Init' ) ) {
 		public static function admin_enqueue_scripts() {
 			wp_enqueue_script( 'ainsys_connector_admin_handle', plugins_url( 'assets/js/ainsys_connector_admin.js', AINSYS_CONNECTOR_PLUGIN ), array( 'jquery' ), '2.0.0', true );
 
-			if ( isset( $_GET['page'] ) && self::$settings_page_name === $_GET['page'] ) {
+			if ( isset( $_GET['page'] ) && false !== strripos( $_GET['page'], self::$settings_page_name ) ) {
 				//wp_enqueue_script('jquery-ui-sortable');
 				wp_enqueue_style( 'ainsys_connector_style_handle', plugins_url( 'assets/css/ainsys_connector_style.css', AINSYS_CONNECTOR_PLUGIN ) );
 				wp_enqueue_style( 'font-awesome_style_handle', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css' );

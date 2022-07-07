@@ -97,7 +97,7 @@ class ainsys_core {
 			$fields = self::sanutise_fields_to_save( $fields );
 
 			global $wpdb;
-			$entiti_saved_settings = ainsys_html::get_saved_entiti_settings_from_db( ' WHERE entiti="' . $entiti . '" setting_key="saved_field" AND setting_name="' . $seting_name . '"' );
+			$entiti_saved_settings = Ainsys_Html::get_saved_entiti_settings_from_db( ' WHERE entiti="' . $entiti . '" setting_key="saved_field" AND setting_name="' . $seting_name . '"' );
 			$responce              = '';
 			if ( empty( $entiti_saved_settings ) ) {
 				$responce      = $wpdb->insert( $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
@@ -276,7 +276,7 @@ class ainsys_core {
 	 */
 	static function reload_log_html() {
 		if ( isset( $_POST["action"] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
-			echo ainsys_html::generate_log_html();
+			echo Ainsys_Html::generate_log_html();
 		}
 		die();
 	}
@@ -313,7 +313,7 @@ class ainsys_core {
 	static function clear_log() {
 		if ( isset( $_POST["action"] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
 			Ainsys_Settings::truncate_log_table();
-			echo ainsys_html::generate_log_html();
+			echo Ainsys_Html::generate_log_html();
 		}
 		die();
 	}
@@ -753,7 +753,7 @@ class ainsys_core {
 				$prepare_data[ $field_name ] = $field_value;
 
 				/// Saving Order field to DB
-				$entiti_saved_settings = ainsys_html::get_saved_entiti_settings_from_db( ' WHERE entiti="order" AND setting_key="extra_field" AND setting_name="' . $field_name . '"' );
+				$entiti_saved_settings = Ainsys_Html::get_saved_entiti_settings_from_db( ' WHERE entiti="order" AND setting_key="extra_field" AND setting_name="' . $field_name . '"' );
 				$responce              = '';
 				if ( empty( $entiti_saved_settings ) ) {
 					$responce      = $wpdb->insert( $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,

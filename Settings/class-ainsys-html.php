@@ -1,8 +1,8 @@
 <?php
-namespace Ainsysconnector\Master;
+namespace Ainsysconnector\Master\Settings;
 
 
-class ainsys_html {
+class Ainsys_Html {
 
 
 	/**
@@ -177,7 +177,7 @@ class ainsys_html {
 	 */
 	static function generate_debug_log() {
 
-		if ( ! (int) Settings\Ainsys_Settings::get_option( 'display_debug' ) ) {
+		if ( ! (int) Ainsys_Settings::get_option( 'display_debug' ) ) {
 			return;
 		}
 
