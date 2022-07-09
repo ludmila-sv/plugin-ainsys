@@ -18,7 +18,7 @@ ainsys_core::init();
 
 class ainsys_core {
 
-	static $notices = [];
+	static $notices = array();
 
 	/**
 	 * Class init
@@ -46,16 +46,16 @@ class ainsys_core {
 
 		add_action( 'plugins_loaded', array( __CLASS__, 'register_events_and_settings' ) );
 
-		add_action( 'admin_notices', [ __CLASS__, 'admin_notices' ] );
+		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 	}
 
 	static function admin_notices( $message, $status = 'success' ) {
 		if ( self::$notices ) {
 			foreach ( self::$notices as $notice ) {
 				?>
-                <div class="notice notice-<?= $notice['status']; ?>" is-dismissible>
-                    <p><?= $notice['message']; ?></p>
-                </div>
+				<div class="notice notice-<?php echo $notice['status']; ?>" is-dismissible>
+					<p><?php echo $notice['message']; ?></p>
+				</div>
 				<?php
 			}
 		}
@@ -67,7 +67,7 @@ class ainsys_core {
 	 * @return
 	 */
 	static function remove_ainsys_integration() {
-		if ( isset( $_POST["action"] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
+		if ( isset( $_POST['action'] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
 			Ainsys_Settings::set_option( 'connectors', '' );
 			Ainsys_Settings::set_option( 'ansys_api_key', '' );
 			Ainsys_Settings::set_option( 'handshake_url', '' );
@@ -85,10 +85,10 @@ class ainsys_core {
 	 *
 	 */
 	static function save_entiti_settings() {
-		if ( isset( $_POST["action"] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
+		if ( isset( $_POST['action'] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
 			$fields      = $_POST;
-			$entiti      = isset( $_POST["entiti"] ) ? $_POST["entiti"] : '';
-			$seting_name = $_POST["seting_name"] ? $_POST["seting_name"] : '';
+			$entiti      = isset( $_POST['entiti'] ) ? $_POST['entiti'] : '';
+			$seting_name = $_POST['seting_name'] ? $_POST['seting_name'] : '';
 			if ( ! $entiti && ! $seting_name ) {
 				echo false;
 				die();
@@ -100,21 +100,23 @@ class ainsys_core {
 			$entiti_saved_settings = Ainsys_Html::get_saved_entiti_settings_from_db( ' WHERE entiti="' . $entiti . '" setting_key="saved_field" AND setting_name="' . $seting_name . '"' );
 			$responce              = '';
 			if ( empty( $entiti_saved_settings ) ) {
-				$responce      = $wpdb->insert( $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
+				$responce      = $wpdb->insert(
+					$wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
 					array(
 						'entiti'       => $entiti,
 						'setting_name' => $seting_name,
 						'setting_key'  => 'saved_field',
-						'value'        => serialize( $fields )
+						'value'        => serialize( $fields ),
 					)
 				);
 				$field_data_id = $wpdb->insert_id;
 			} else {
-				$responce      = $wpdb->update( $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
+				$responce      = $wpdb->update(
+					$wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
 					array( 'value' => serialize( $fields ) ),
-					array( 'id' => $entiti_saved_settings["id"] )
+					array( 'id' => $entiti_saved_settings['id'] )
 				);
-				$field_data_id = $entiti_saved_settings["id"];
+				$field_data_id = $entiti_saved_settings['id'];
 			}
 
 			$request_action = 'field/' . $entiti . '/' . $seting_name;
@@ -122,11 +124,11 @@ class ainsys_core {
 			$fields = apply_filters( 'ainsys_update_entiti_fields', $fields );
 
 			$request_data = array(
-				'entity'  => [
+				'entity'  => array(
 					'id' => $field_data_id,
-				],
+				),
 				'action'  => $request_action,
-				'payload' => $fields
+				'payload' => $fields,
 			);
 
 			try {
@@ -146,15 +148,15 @@ class ainsys_core {
 
 	static function sanutise_fields_to_save( $fields ) {
 		// clear empty fields
-//        foreach ($fields as $field => $val){
-//            if (empty($val))
-//                unset($fields[$field]);
-//        }
-		unset( $fields["action"], $fields["entiti"], $fields["nonce"], $fields["seting_name"], $fields["id"] );
+		//        foreach ($fields as $field => $val){
+		//            if (empty($val))
+		//                unset($fields[$field]);
+		//        }
+		unset( $fields['action'], $fields['entiti'], $fields['nonce'], $fields['seting_name'], $fields['id'] );
 
 		/// exclude 'constant' variables
 		foreach ( Ainsys_Settings::get_entities_settings() as $item => $setting ) {
-			if ( isset( $fields[ $item ] ) && $setting["type"] === 'constant' ) {
+			if ( isset( $fields[ $item ] ) && 'constant' === $setting['type'] ) {
 				unset( $fields[ $item ] );
 			}
 		}
@@ -171,7 +173,7 @@ class ainsys_core {
 	 * @return string
 	 */
 	public static function curl_exec_func( $post_fields = '', $url = '' ) {
-		$url = $url ?: (string) get_option( 'ansys_connector_woocommerce_ansys_api_key' );
+		$url = $url ? $url : (string) get_option( 'ansys_connector_woocommerce_ansys_api_key' );
 
 		if ( ! $url ) {
 			/// Save curl requests for debug
@@ -182,50 +184,52 @@ class ainsys_core {
 
 		//$key = Ainsys_Settings::get_option('ansys_api_key');
 
-//		$curl = curl_init();
-//
-//		curl_setopt_array( $curl, [
-//			CURLOPT_URL            => $url,
-//			CURLOPT_RETURNTRANSFER => true,
-//			CURLOPT_ENCODING       => "",
-//			CURLOPT_MAXREDIRS      => 10,
-//			CURLOPT_TIMEOUT        => 30,
-//			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-//			CURLOPT_HTTPHEADER     => [
-//				//"Authorization: Bearer " .$key,
-//				"Content-Type: application/json"
-//			],
-//		] );
-//
-//
-//		/// Switch to POST if post fields specified
-//		if ( $post_fields ) {
-//			curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, "POST" );
-//			curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $post_fields ) );
-//		}
-//
-//		$response = curl_exec( $curl );
-//		$err      = curl_error( $curl );
-//
-//
-//		curl_close( $curl );
+		//      $curl = curl_init();
+		//
+		//      curl_setopt_array( $curl, [
+		//          CURLOPT_URL            => $url,
+		//          CURLOPT_RETURNTRANSFER => true,
+		//          CURLOPT_ENCODING       => "",
+		//          CURLOPT_MAXREDIRS      => 10,
+		//          CURLOPT_TIMEOUT        => 30,
+		//          CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+		//          CURLOPT_HTTPHEADER     => [
+		//              //"Authorization: Bearer " .$key,
+		//              "Content-Type: application/json"
+		//          ],
+		//      ] );
+		//
+		//
+		//      /// Switch to POST if post fields specified
+		//      if ( $post_fields ) {
+		//          curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, "POST" );
+		//          curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $post_fields ) );
+		//      }
+		//
+		//      $response = curl_exec( $curl );
+		//      $err      = curl_error( $curl );
+		//
+		//
+		//      curl_close( $curl );
 
 		//$response = $err ? "cURL Error #:" . $err : $response;
 
-		$response = wp_remote_post( $url, array(
-			'timeout'     => 30,
-			'redirection' => 10,
-			'httpversion' => '1.0',
-			'blocking'    => true,
-			'headers'     => array( 'content-type' => 'application/json' ),
-			'body'        => wp_json_encode( $post_fields, 256 ),
-			'cookies'     => array(),
-			'sslverify'   => false
-		) );
+		$response = wp_remote_post(
+			$url,
+			array(
+				'timeout'     => 30,
+				'redirection' => 10,
+				'httpversion' => '1.0',
+				'blocking'    => true,
+				'headers'     => array( 'content-type' => 'application/json' ),
+				'body'        => wp_json_encode( $post_fields, 256 ),
+				'cookies'     => array(),
+				'sslverify'   => false,
+			)
+		);
 
 		/// Save curl requests for debug
 		self::log( $response );
-
 
 		return $response;
 	}
@@ -257,13 +261,14 @@ class ainsys_core {
 			return false;
 		}
 
-		$responce = $wpdb->insert( $wpdb->prefix . Ainsys_Init::$ainsys_log_table,
+		$responce = $wpdb->insert(
+			$wpdb->prefix . Ainsys_Init::$ainsys_log_table,
 			array(
 				'object_id'        => $object_id,
 				'request_action'   => $request_action,
 				'request_data'     => $request_data,
 				'serrver_responce' => $serrver_responce,
-				'incoming_call'    => $incoming_call
+				'incoming_call'    => $incoming_call,
 			)
 		);
 
@@ -275,7 +280,7 @@ class ainsys_core {
 	 *
 	 */
 	static function reload_log_html() {
-		if ( isset( $_POST["action"] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
+		if ( isset( $_POST['action'] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
 			echo Ainsys_Html::generate_log_html();
 		}
 		die();
@@ -286,22 +291,22 @@ class ainsys_core {
 	 *
 	 */
 	static function toggle_logging() {
-		if ( isset( $_POST["command"] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
+		if ( isset( $_POST['command'] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
 			/// Set time till log will be saved, 0 if infinity
-			if ( isset( $_POST["time"] ) ) {
-				if ( (int) $_POST["time"] > 0 ) {
-					$current_date_time = date( "Y-m-d H:i:s" );
-					Ainsys_Settings::set_option( 'log_until_certain_time', strtotime( $current_date_time . '+' . $_POST["time"] . ' hours' ) );
+			if ( isset( $_POST['time'] ) ) {
+				if ( (int) $_POST['time'] > 0 ) {
+					$current_date_time = mgdate( 'Y-m-d H:i:s' );
+					Ainsys_Settings::set_option( 'log_until_certain_time', strtotime( $current_date_time . '+' . $_POST['time'] . ' hours' ) );
 				} else {
 					Ainsys_Settings::set_option( 'log_until_certain_time', 0 );
 				}
 			}
-			if ( $_POST['command'] === 'start_loging' ) {
+			if ( 'start_loging' === $_POST['command'] ) {
 				Ainsys_Settings::set_option( 'do_log_transactions', 1 );
 			} else {
 				Ainsys_Settings::set_option( 'do_log_transactions', 0 );
 			}
-			echo $_POST['command'] === 'start_loging' ? '#stop_loging' : '#start_loging';
+			echo 'start_loging' === $_POST['command'] ? '#stop_loging' : '#start_loging';
 		}
 		die();
 	}
@@ -311,7 +316,7 @@ class ainsys_core {
 	 *
 	 */
 	static function clear_log() {
-		if ( isset( $_POST["action"] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
+		if ( isset( $_POST['action'] ) && isset( $_POST['nonce'] ) && wp_verify_nonce( $_POST['nonce'], Ainsys_Settings::$nonce_title ) ) {
 			Ainsys_Settings::truncate_log_table();
 			echo Ainsys_Html::generate_log_html();
 		}
@@ -334,7 +339,7 @@ class ainsys_core {
 		$request_data = array(
 			'object_id'      => $comment_id,
 			'request_action' => $request_action,
-			'request_data'   => $fields
+			'request_data'   => $fields,
 		);
 
 		try {
@@ -359,11 +364,11 @@ class ainsys_core {
 	static function prepare_comment_data( $comment_id, $data ) {
 		$data['id'] = $comment_id;
 		/// Get ACF fields
-		$acf_fields = [];
+		$acf_fields = array();
 		if ( Ainsys_Settings::is_plugin_active( 'advanced-custom-fields-pro-master/acf.php' ) ) {
 			$acf_tmp = get_field_objects( 'comment_' . $comment_id );
 			foreach ( $acf_tmp as $label => $val ) {
-				$acf_fields[ $val["key"] ] = $val["value"];
+				$acf_fields[ $val['key'] ] = $val['value'];
 			}
 		}
 
@@ -386,7 +391,7 @@ class ainsys_core {
 		$request_data = array(
 			'object_id'      => $comment_id,
 			'request_action' => $request_action,
-			'request_data'   => $fields
+			'request_data'   => $fields,
 		);
 
 		try {
@@ -413,14 +418,13 @@ class ainsys_core {
 		$fields = apply_filters( 'ainsys_update_product_fields', self::prepare_single_product( $product ), $product );
 
 		$request_data = array(
-			'entity'  => [
+			'entity'  => array(
 				'id'   => $product_id,
-				'name' => 'product'
-			],
+				'name' => 'product',
+			),
 			'action'  => $request_action,
-			'payload' => $fields
+			'payload' => $fields,
 		);
-
 
 		try {
 			$server_responce = self::curl_exec_func( $request_data );
@@ -500,7 +504,7 @@ class ainsys_core {
 			//'attributes'         => $this->get_attributes( $product ),
 			//'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => $product->get_download_limit(),
-			'download_expiry'    => $product->get_download_expiry()
+			'download_expiry'    => $product->get_download_expiry(),
 			//'download_type'      => 'standard',
 			//'purchase_note'      => apply_filters( 'the_content', $product->get_purchase_note() )
 			//'total_sales'        => $product->get_total_sales(),
@@ -522,12 +526,12 @@ class ainsys_core {
 		$fields = apply_filters( 'ainsys_user_details_update_fields', self::prepare_user_data( $user_id, $userdata ), $userdata );
 
 		$request_data = array(
-			'entity'  => [
+			'entity'  => array(
 				'id'   => $user_id,
-				'name' => 'user'
-			],
+				'name' => 'user',
+			),
 			'action'  => $request_action,
-			'payload' => $fields
+			'payload' => $fields,
 		);
 
 		try {
@@ -552,11 +556,11 @@ class ainsys_core {
 	static function prepare_user_data( $user_id, $data ) {
 		//$data['id'] = $user_id;
 		/// Get ACF fields
-		$acf_fields = [];
+		$acf_fields = array();
 		if ( Ainsys_Settings::is_plugin_active( 'advanced-custom-fields-pro-master/acf.php' ) ) {
 			$acf_tmp = get_field_objects( 'user_' . $user_id );
 			foreach ( $acf_tmp as $label => $val ) {
-				$acf_fields[ $val["key"] ] = $val["value"];
+				$acf_fields[ $val['key'] ] = $val['value'];
 			}
 		}
 
@@ -577,12 +581,12 @@ class ainsys_core {
 		$fields = apply_filters( 'ainsys_new_user_fields', self::prepare_user_data( $user_id, $userdata ), $userdata );
 
 		$request_data = array(
-			'entity'  => [
+			'entity'  => array(
 				'id'   => $user_id,
-				'name' => 'user'
-			],
+				'name' => 'user',
+			),
 			'action'  => $request_action,
-			'payload' => $fields
+			'payload' => $fields,
 		);
 
 		try {
@@ -619,14 +623,14 @@ class ainsys_core {
 		//self::save_log_information($order_id, 'settings dump', serialize($data), '', 0);
 
 		// Prepare order data
-		$fields   = self::prepareFields( $data );
+		$fields   = self::prepare_fields( $data );
 		$utm_data = self::get_utm_fields();
 
 		//Prepare products
 		if ( isset( $data['line_items'] ) && ! empty( $data['line_items'] ) ) {
 			$products = self::prepare_products( $data['line_items'] );
 		} else {
-			$products = [];
+			$products = array();
 		}
 
 		$fields_filtered = apply_filters( 'ainsys_new_order_fields', $fields, $order );
@@ -634,12 +638,12 @@ class ainsys_core {
 		self::sanitize_aditional_order_fields( array_diff( $fields_filtered, $fields ), $data['id'] );
 
 		$order_data = array(
-			'entity'  => [
+			'entity'  => array(
 				'id'   => $order_id,
-				'name' => 'order'
-			],
+				'name' => 'order',
+			),
 			'action'  => $request_action,
-			'payload' => array_merge( $fields_filtered, $utm_data, [ 'products' => $products ] )
+			'payload' => array_merge( $fields_filtered, $utm_data, array( 'products' => $products ) ),
 		);
 
 		try {
@@ -660,10 +664,10 @@ class ainsys_core {
 	 *
 	 * @return array
 	 */
-	private static function prepareFields( $data = [] ) {
+	private static function prepare_fields( $data = array() ) {
 		$all_fields = WC()->checkout->get_checkout_fields();
 
-		$prepare_data = [];
+		$prepare_data = array();
 		if ( ! empty( $data['id'] ) ) {
 			$prepare_data['id'] = $data['id'];
 		}
@@ -692,8 +696,7 @@ class ainsys_core {
 			$prepare_data['customer_note'] = $data['customer_note'];
 		}
 
-
-		$prepare_data['date'] = date( "Y-m-d H:i:s" );
+		$prepare_data['date'] = mgdate( 'Y-m-d H:i:s' );
 
 		// get applaed cupons
 		$coupons = WC()->cart->get_coupons();
@@ -709,13 +712,13 @@ class ainsys_core {
 				if ( ! empty( $billing_value ) ) {
 					$prepare_data[ 'billing_' . $billing_key ] = $billing_value;
 				}
-				unset( $all_fields["billing"][ 'billing_' . $billing_key ] );
+				unset( $all_fields['billing'][ 'billing_' . $billing_key ] );
 			}
 		}
 
 		/// search for custom fields
-		if ( ! empty( $all_fields["billing"] ) ) {
-			$prepare_data = array_merge( $prepare_data, self::sanitize_aditional_order_fields( $all_fields["billing"], $data['id'] ) );
+		if ( ! empty( $all_fields['billing'] ) ) {
+			$prepare_data = array_merge( $prepare_data, self::sanitize_aditional_order_fields( $all_fields['billing'], $data['id'] ) );
 		}
 
 		//shipping
@@ -724,12 +727,12 @@ class ainsys_core {
 				if ( ! empty( $shipping_value ) ) {
 					$prepare_data[ 'shipping_' . $shipping_key ] = $shipping_value;
 				}
-				unset( $all_fields["shipping"][ 'shipping_' . $shipping_key ] );
+				unset( $all_fields['shipping'][ 'shipping_' . $shipping_key ] );
 			}
 		}
 		/// search for custom fields
-		if ( ! empty( $all_fields["shipping"] ) ) {
-			$prepare_data = array_merge( $prepare_data, self::sanitize_aditional_order_fields( $all_fields["shipping"], $data['id'] ) );
+		if ( ! empty( $all_fields['shipping'] ) ) {
+			$prepare_data = array_merge( $prepare_data, self::sanitize_aditional_order_fields( $all_fields['shipping'], $data['id'] ) );
 		}
 
 		return $prepare_data;
@@ -745,7 +748,7 @@ class ainsys_core {
 	 */
 	static function sanitize_aditional_order_fields( $aditional_fields, $order_id ) {
 		global $wpdb;
-		$prepare_data = [];
+		$prepare_data = array();
 		foreach ( $aditional_fields as $field_name => $fields ) {
 			$field_value = get_post_meta( $order_id, '_' . $field_name, true );
 			if ( ! empty( $field_value ) ) {
@@ -756,12 +759,13 @@ class ainsys_core {
 				$entiti_saved_settings = Ainsys_Html::get_saved_entiti_settings_from_db( ' WHERE entiti="order" AND setting_key="extra_field" AND setting_name="' . $field_name . '"' );
 				$responce              = '';
 				if ( empty( $entiti_saved_settings ) ) {
-					$responce      = $wpdb->insert( $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
+					$responce      = $wpdb->insert(
+						$wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
 						array(
 							'entiti'       => 'order',
 							'setting_name' => $field_name,
 							'setting_key'  => 'extra_field',
-							'value'        => serialize( $fields )
+							'value'        => serialize( $fields ),
 						)
 					);
 					$field_data_id = $wpdb->insert_id;
@@ -769,9 +773,10 @@ class ainsys_core {
 					/// Save new field to log
 					self::save_log_information( $field_data_id, $field_name, 'order_cstom_field_saved', '', 0 );
 				} else {
-					$responce = $wpdb->update( $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
+					$responce = $wpdb->update(
+						$wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings,
 						array( 'value' => serialize( $fields ) ),
-						array( 'id' => $entiti_saved_settings["id"] )
+						array( 'id' => $entiti_saved_settings['id'] )
 					);
 				}
 			}
@@ -786,7 +791,7 @@ class ainsys_core {
 	 * @return array
 	 */
 	public static function get_utm_fields() {
-		$data = [];
+		$data = array();
 		if ( ! empty( utm_hendler::get_referer_url() ) ) {
 			$data['REFERER'] = utm_hendler::get_referer_url();
 		}
@@ -813,8 +818,8 @@ class ainsys_core {
 	 *
 	 * @return array
 	 */
-	private static function prepare_products( $products = [] ) {
-		$prepare_data = [];
+	private static function prepare_products( $products = array() ) {
+		$prepare_data = array();
 		if ( empty( $products ) ) {
 			return $prepare_data;
 		}
@@ -835,7 +840,7 @@ class ainsys_core {
 			}
 
 			//If discounted
-			if ( $price != $regular_price ) {
+			if ( $price !== $regular_price ) {
 				$prepare_data[ $item_id ]['discount_type_id'] = 1;
 				$prepare_data[ $item_id ]['discount_sum']     = $regular_price - $price;
 			}
@@ -867,8 +872,8 @@ class ainsys_core {
 			'request_action' => $request_action,
 			'request_data'   => array(
 				'status'   => strtoupper( trim( $status ) ),
-				'hostname' => $host
-			)
+				'hostname' => $host,
+			),
 		);
 
 		try {
@@ -892,7 +897,7 @@ class ainsys_core {
 
 		if ( ! empty( $webhook_url ) && empty( get_option( 'ainsys-webhook_url' ) ) ) {
 			//new connector
-			$webhook_call  = self::curl_exec_func( [ 'hook_url' => Ainsys_Settings::get_option( 'ansys_connector_woocommerce_ansys_api_key' ) ], $key );
+			$webhook_call  = self::curl_exec_func( array( 'hook_url' => Ainsys_Settings::get_option( 'ansys_connector_woocommerce_ansys_api_key' ) ), $key );
 			$webhook_array = ! empty( $webhook_call ) ? json_decode( $webhook_call ) : '';
 			if ( ! empty( $webhook_call ) && isset( $webhook_array->webhook_url ) ) {
 				Ainsys_Settings::set_option( 'webhook_url', $webhook_array->webhook_url );
@@ -900,33 +905,33 @@ class ainsys_core {
 
 			// old connector
 			//          $connectors = Ainsys_Settings::get_option('connectors');
-//            if (empty($connectors)){
-//                $server_url = empty(Ainsys_Settings::get_option('server')) ? 'https://user-api.ainsys.com/' : Ainsys_Settings::get_option('server');
-//                $workspace = empty(Ainsys_Settings::get_option('workspace')) ? 14 : Ainsys_Settings::get_option('workspace');
-//                $url = $server_url . 'api/v0/workspace-management/workspaces/' . $workspace . '/connectors/';
-//                $sys_id = empty((int)Ainsys_Settings::get_option('sys_id')) ? 3 : (int)Ainsys_Settings::get_option('sys_id');
-//                $post_fields = array(
-//                    "name" => 'string',
-//                    "system" => $sys_id,
-//                    "workspace" => 14,
-//                    "created_by" => 0);
-//                $connectors_responce = self::curl_exec_func( $post_fields, $url );
-//                $connectors_array = !empty($connectors_responce) ? json_decode($connectors_responce) : '';
-//                if ( !empty($connectors_array) && isset($connectors_array->id) ){
-//                    Ainsys_Settings::set_option('connectors', $connectors_array->id);
-//                    $url = $server_url . 'api/v0/workspace-management/workspaces/'. $workspace . '/connectors/'. $connectors_array->id . '/handshake-url/';
-//                    $url_responce = self::curl_exec_func('', $url );
-//                    $url_array = !empty($url_responce) ? json_decode($url_responce) : '';
-//                    if ( !empty($url_array) && isset($url_array->url) ){
-//                        Ainsys_Settings::set_option('handshake_url', $url_array->url);
-//                        $webhook_call = self::curl_exec_func( ['webhook_url' => Ainsys_Settings::get_option('hook_url')], $url_array->url );
-//                        $webhook_array = !empty($webhook_call) ? json_decode($webhook_call) : '';
-//                        if (! empty($webhook_call) && isset($webhook_array->webhook_url)){
-//                            Ainsys_Settings::set_option('webhook_url', $webhook_array->webhook_url);
-//                        }
-//                    }
-//                }
-//            }
+			//            if (empty($connectors)){
+			//                $server_url = empty(Ainsys_Settings::get_option('server')) ? 'https://user-api.ainsys.com/' : Ainsys_Settings::get_option('server');
+			//                $workspace = empty(Ainsys_Settings::get_option('workspace')) ? 14 : Ainsys_Settings::get_option('workspace');
+			//                $url = $server_url . 'api/v0/workspace-management/workspaces/' . $workspace . '/connectors/';
+			//                $sys_id = empty((int)Ainsys_Settings::get_option('sys_id')) ? 3 : (int)Ainsys_Settings::get_option('sys_id');
+			//                $post_fields = array(
+			//                    "name" => 'string',
+			//                    "system" => $sys_id,
+			//                    "workspace" => 14,
+			//                    "created_by" => 0);
+			//                $connectors_responce = self::curl_exec_func( $post_fields, $url );
+			//                $connectors_array = !empty($connectors_responce) ? json_decode($connectors_responce) : '';
+			//                if ( !empty($connectors_array) && isset($connectors_array->id) ){
+			//                    Ainsys_Settings::set_option('connectors', $connectors_array->id);
+			//                    $url = $server_url . 'api/v0/workspace-management/workspaces/'. $workspace . '/connectors/'. $connectors_array->id . '/handshake-url/';
+			//                    $url_responce = self::curl_exec_func('', $url );
+			//                    $url_array = !empty($url_responce) ? json_decode($url_responce) : '';
+			//                    if ( !empty($url_array) && isset($url_array->url) ){
+			//                        Ainsys_Settings::set_option('handshake_url', $url_array->url);
+			//                        $webhook_call = self::curl_exec_func( ['webhook_url' => Ainsys_Settings::get_option('hook_url')], $url_array->url );
+			//                        $webhook_array = !empty($webhook_call) ? json_decode($webhook_call) : '';
+			//                        if (! empty($webhook_call) && isset($webhook_array->webhook_url)){
+			//                            Ainsys_Settings::set_option('webhook_url', $webhook_array->webhook_url);
+			//                        }
+			//                    }
+			//                }
+			//            }
 		}
 	}
 
@@ -940,22 +945,22 @@ class ainsys_core {
 	public static function is_ainsys_integration_active( $actions = '' ) {
 		$webhook_url = get_option( 'ansys_connector_woocommerce_ansys_api_key' );
 
-//		if ( ! empty( $webhook_url ) && ! empty( get_option( 'ainsys-webhook_url' ) ) ) {
-//			return array( 'status' => 'success' );
-//		}
-//
-//		$request_to_ainsys = wp_remote_post( $webhook_url, [
-//			'sslverify' => false,
-//			'body'      => [
-//				'webhook_url' => get_option( 'ansys_connector_woocommerce_hook_url' )
-//			]
-//		] );
+		//      if ( ! empty( $webhook_url ) && ! empty( get_option( 'ainsys-webhook_url' ) ) ) {
+		//          return array( 'status' => 'success' );
+		//      }
+		//
+		//      $request_to_ainsys = wp_remote_post( $webhook_url, [
+		//          'sslverify' => false,
+		//          'body'      => [
+		//              'webhook_url' => get_option( 'ansys_connector_woocommerce_hook_url' )
+		//          ]
+		//      ] );
 
-//		if ( is_wp_error( $request_to_ainsys ) ) {
-//			return array( 'status' => 'none' );
-//		}
+		//      if ( is_wp_error( $request_to_ainsys ) ) {
+		//          return array( 'status' => 'none' );
+		//      }
 
-//		$parsed_response = json_decode( $request_to_ainsys['body'] );
+		//      $parsed_response = json_decode( $request_to_ainsys['body'] );
 
 		if ( $webhook_url ) {
 			self::add_admin_notice( 'Соединение с сервером Ainsys установлено. Webhook_url получен.' );
@@ -967,10 +972,10 @@ class ainsys_core {
 	}
 
 	static function add_admin_notice( $message, $status = 'success' ) {
-		self::$notices[] = [
+		self::$notices[] = array(
 			'message' => $message,
-			'status'  => $status
-		];
+			'status'  => $status,
+		);
 	}
 
 	/**
@@ -984,42 +989,45 @@ class ainsys_core {
 		$string = (string) $string;
 		$string = trim( $string );
 		$string = function_exists( 'mb_strtolower' ) ? mb_strtolower( $string ) : strtolower( $string );
-		$string = strtr( $string, array(
-			'а' => 'a',
-			'б' => 'b',
-			'в' => 'v',
-			'г' => 'g',
-			'д' => 'd',
-			'е' => 'e',
-			'ё' => 'e',
-			'ж' => 'j',
-			'з' => 'z',
-			'и' => 'i',
-			'й' => 'y',
-			'к' => 'k',
-			'л' => 'l',
-			'м' => 'm',
-			'н' => 'n',
-			'о' => 'o',
-			'п' => 'p',
-			'р' => 'r',
-			'с' => 's',
-			'т' => 't',
-			'у' => 'u',
-			'ф' => 'f',
-			'х' => 'h',
-			'ц' => 'c',
-			'ч' => 'ch',
-			'ш' => 'sh',
-			'щ' => 'shch',
-			'ы' => 'y',
-			'э' => 'e',
-			'ю' => 'yu',
-			'я' => 'ya',
-			'ъ' => '',
-			'ь' => '',
-			' ' => '_'
-		) );
+		$string = strtr(
+			$string,
+			array(
+				'а' => 'a',
+				'б' => 'b',
+				'в' => 'v',
+				'г' => 'g',
+				'д' => 'd',
+				'е' => 'e',
+				'ё' => 'e',
+				'ж' => 'j',
+				'з' => 'z',
+				'и' => 'i',
+				'й' => 'y',
+				'к' => 'k',
+				'л' => 'l',
+				'м' => 'm',
+				'н' => 'n',
+				'о' => 'o',
+				'п' => 'p',
+				'р' => 'r',
+				'с' => 's',
+				'т' => 't',
+				'у' => 'u',
+				'ф' => 'f',
+				'х' => 'h',
+				'ц' => 'c',
+				'ч' => 'ch',
+				'ш' => 'sh',
+				'щ' => 'shch',
+				'ы' => 'y',
+				'э' => 'e',
+				'ю' => 'yu',
+				'я' => 'ya',
+				'ъ' => '',
+				'ь' => '',
+				' ' => '_',
+			)
+		);
 
 		return $string;
 	}

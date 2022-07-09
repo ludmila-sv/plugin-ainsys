@@ -12,7 +12,7 @@ class Ainsys_Html {
 	 */
 	static function get_property( $name, $prop_val, $entiti_saved_settings ) {
 		if ( is_array( $prop_val['default'] ) ) {
-			return isset( $entiti_saved_settings[ strtolower( $name ) ] ) ? $entiti_saved_settings[ strtolower( $name ) ] : array_search( '1', $prop_val['default'] );
+			return isset( $entiti_saved_settings[ strtolower( $name ) ] ) ? $entiti_saved_settings[ strtolower( $name ) ] : array_search( '1', $prop_val['default'], true );
 		}
 
 		return isset( $entiti_saved_settings[ strtolower( $name ) ] ) ?
@@ -32,23 +32,23 @@ class Ainsys_Html {
 		}
 
 		foreach ( $properties as $item => $settings ) {
-			$checker_property = $settings['type'] === 'bool' || $item === 'api' ? 'small_property' : '';
+			$checker_property = 'bool' === $settings['type'] || 'api' === $item ? 'small_property' : '';
 			$inner_fields    .= '<div class="properties_field ' . $checker_property . '">';
-			$field_value      = $item === 'id' ? $field_slug : self::get_property( $item, $settings, $entiti_saved_settings );
+			$field_value      = 'id' === $item ? $field_slug : self::get_property( $item, $settings, $entiti_saved_settings );
 			switch ( $settings['type'] ) {
 				case 'constant':
-					$field_value   = $field_value ? $field_value : '<i>' . __( 'empty', AINSYS_CONNECTOR_TEXTDOMAIN ) . '</i>';
-					$inner_fields .= $item === 'api' ? '<div class="entiti_settings_value constant ' . $field_value . '"></div>' : '<div class="entiti_settings_value constant">' . $field_value . '</div>';
+					$field_value   = $field_value ? $field_value : '<i>' . __( 'empty', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) . '</i>';
+					$inner_fields .= 'api' === $item ? '<div class="entiti_settings_value constant ' . $field_value . '"></div>' : '<div class="entiti_settings_value constant">' . $field_value . '</div>';
 					break;
 				case 'bool':
 					$checked       = (int) $field_value ? 'checked="" value="1"' : ' value="0"';
-					$checked_text  = (int) $field_value ? __( 'On', AINSYS_CONNECTOR_TEXTDOMAIN ) : __( 'Off', AINSYS_CONNECTOR_TEXTDOMAIN );
+					$checked_text  = (int) $field_value ? __( 'On', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) : __( 'Off', 'AINSYS_CONNECTOR_TEXTDOMAIN' );
 					$inner_fields .= '<input type="checkbox"  class="editor_mode entiti_settings_value " id="' . $item . '" ' . $checked . '/> ';
 					$inner_fields .= '<div class="entiti_settings_value">' . $checked_text . '</div> ';
 					break;
 				case 'int':
 					$inner_fields .= '<input size="10" type="text"  class="editor_mode entiti_settings_value" id="' . $item . '" value="' . $field_value . '"/> ';
-					$field_value   = $field_value ? $field_value : '<i>' . __( 'empty', AINSYS_CONNECTOR_TEXTDOMAIN ) . '</i>';
+					$field_value   = $field_value ? $field_value : '<i>' . __( 'empty', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) . '</i>';
 					$inner_fields .= '<div class="entiti_settings_value">' . $field_value . '</div>';
 					break;
 				case 'select':
@@ -63,9 +63,9 @@ class Ainsys_Html {
 					$inner_fields .= '<div class="entiti_settings_value">' . $field_value . '</div>';
 					break;
 				default:
-					$field_length  = $item === 'description' ? 20 : 8;
+					$field_length  = 'description' === $item ? 20 : 8;
 					$inner_fields .= '<input size="' . $field_length . '" type="text" class="editor_mode entiti_settings_value" id="' . $item . '" value="' . $field_value . '"/>';
-					$field_value   = $field_value ? $field_value : '<i>' . __( 'empty', AINSYS_CONNECTOR_TEXTDOMAIN ) . '</i>';
+					$field_value   = $field_value ? $field_value : '<i>' . __( 'empty', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) . '</i>';
 					$inner_fields .= '<div class="entiti_settings_value">' . $field_value . '</div>';
 			}
 			/// close //// div class="properties_field"
@@ -83,9 +83,8 @@ class Ainsys_Html {
 	 */
 	static function get_saved_entiti_settings_from_db( $where = '', $single = true ) {
 		global $wpdb;
-		$query   = 'SELECT * 
-        FROM ' . $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings . $where;
-		$resoult = $wpdb->get_results( $query, ARRAY_A );
+		$table_name_and_where = $wpdb->prefix . Ainsys_Settings::$ainsys_entitis_settings . $where;
+		$resoult              = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %s', $table_name_and_where ), ARRAY_A );
 		if ( isset( $resoult[0]['value'] ) && $single ) {
 			$keys = array_column( $resoult, 'setting_key' );
 			if ( count( $resoult ) > 1 && isset( array_flip( $keys )['saved_field'] ) ) {
@@ -111,15 +110,14 @@ class Ainsys_Html {
 
 		global $wpdb;
 
-		$log_html        = '<div id="connection_log"><table class="form-table">';
-		$log_html_body   = '';
-		$log_html_header = '';
-		$query           = 'SELECT * 
-        FROM ' . $wpdb->prefix . \Ainsysconnector\Master\Core\Ainsys_Init::$ainsys_log_table . $where;
-		$output          = $wpdb->get_results( $query, ARRAY_A );
+		$log_html             = '<div id="connection_log"><table class="form-table">';
+		$log_html_body        = '';
+		$log_html_header      = '';
+		$table_name_and_where = $wpdb->prefix . \Ainsysconnector\Master\Core\Ainsys_Init::$ainsys_log_table . $where;
+		$output               = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %s', $table_name_and_where ), ARRAY_A );
 
 		if ( empty( $output ) ) {
-			return '<div class="empty_tab"><h3>' . __( 'No transactions to display', AINSYS_CONNECTOR_TEXTDOMAIN ) . '</h3></div>';
+			return '<div class="empty_tab"><h3>' . __( 'No transactions to display', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) . '</h3></div>';
 		}
 
 		foreach ( $output as $item ) {
@@ -128,13 +126,13 @@ class Ainsys_Html {
 			foreach ( $item as $name => $value ) {
 				$log_html_header .= $header_full ? '<th>' . strtoupper( str_replace( '_', ' ', $name ) ) . '</th>' : '';
 				$log_html_body   .= '<td class="' . $name . '">';
-				if ( $name === 'incoming_call' ) {
-					$value = (int) $value === 0 ? 'No' : 'Yes';
+				if ( 'incoming_call' === $name ) {
+					$value = 0 === (int) $value ? 'No' : 'Yes';
 				}
-				if ( $name === 'request_data' ) {
+				if ( 'request_data' === $name ) {
 					$value = maybe_unserialize( $value );
 					if ( empty( $value['request_data'] ) ) {
-						$log_html_body .= $value ? '<div class="gray_header">' . __( 'empty', AINSYS_CONNECTOR_TEXTDOMAIN ) . '</div>' : $value;
+						$log_html_body .= $value ? '<div class="gray_header">' . __( 'empty', 'AINSYS_CONNECTOR_TEXTDOMAIN' ) . '</div>' : $value;
 						continue;
 					}
 					if ( is_array( $value ) ) {
@@ -142,7 +140,7 @@ class Ainsys_Html {
 							$log_html_body .= '<div class="request_data_contaner"> <a class="button expand_data_contaner">more</a>';
 						}
 						foreach ( $value['request_data'] as $title => $param ) {
-							if ( $title === 'products' && ! empty( $param ) ) {
+							if ( 'products' === $title && ! empty( $param ) ) {
 								foreach ( $param as $prod_id => $product ) {
 									$log_html_body .= '</br> <strong>Prod# ' . $prod_id . '</strong>';
 									foreach ( $product as $param_title => $poduct_param ) {
